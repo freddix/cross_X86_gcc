@@ -12,7 +12,6 @@ Source2:	ftp://ftp.gnu.org/gnu/gmp/gmp-5.0.5.tar.xz
 # Source2-md5:	8aef50959acec2a1ad41d144ffe0f3b5
 Source3:	http://multiprecision.org/mpc/download/mpc-1.0.1.tar.gz
 # Source3-md5:	b32a2e1a3daa392372fbd586d1ed3679
-Source10:	gcc-optimize-la.pl
 URL:		http://gcc.gnu.org/
 BuildConflicts:	gmp-devel
 BuildConflicts:	mpc-devel
