@@ -1,15 +1,19 @@
+%define		mver	4.9
+%define		snap	20140820
+
 Summary:	Cross GNU Compiler Collection for the x86_64 architecture
 Name:		cross_X86_gcc
-Version:	4.7.2
+Version:	4.9.2
 Release:	1
 License:	GPL v3+
 Group:		Development/Languages
-Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	cc308a0891e778cfda7a151ab8a6e762
-Source1:	http://www.mpfr.org/mpfr-current/mpfr-3.1.1.tar.xz
-# Source1-md5:	91d51c41fcf2799e4ee7a7126fc95c17
-Source2:	ftp://ftp.gnu.org/gnu/gmp/gmp-5.0.5.tar.xz
-# Source2-md5:	8aef50959acec2a1ad41d144ffe0f3b5
+#Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
+Source0:	ftp://gcc.gnu.org/pub/gcc/snapshots/%{mver}-%{snap}/gcc-%{mver}-%{snap}.tar.bz2
+# Source0-md5:	f801935766e791a71efe23e037f7e058
+Source1:	http://www.mpfr.org/mpfr-current/mpfr-3.1.2.tar.xz
+# Source1-md5:	e3d203d188b8fe60bb6578dd3152e05c
+Source2:	ftp://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.xz
+# Source2-md5:	1e6da4e434553d2811437aa42c7f7c76
 Source3:	http://multiprecision.org/mpc/download/mpc-1.0.1.tar.gz
 # Source3-md5:	b32a2e1a3daa392372fbd586d1ed3679
 URL:		http://gcc.gnu.org/
@@ -31,7 +35,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		_libexecdir	%{_libdir}
 %define		_slibdir	%{_libdir}
 
-%define         target          i686-freddix-linux
+%define         target          i586-freddix-linux
 %define         arch            %{_prefix}/%{target}
 %define         gccarch         %{_libdir}/gcc/%{target}
 %define         gcclib          %{gccarch}/%{version}
@@ -44,15 +48,15 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 Cross GNU Compiler Collection for the x86_64 architecture.
 
 %prep
-%setup -qn gcc-%{version}
+%setup -qn gcc-%{mver}-%{snap}
 
 # undefined reference to `__stack_chk_guard'
 sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure
 
 tar -xf %{SOURCE1}
-mv mpfr-3.1.1 mpfr
+mv mpfr-3.1.2 mpfr
 tar -xf %{SOURCE2}
-mv gmp-5.0.5 gmp
+mv gmp-6.0.0 gmp
 tar -xf %{SOURCE3}
 mv mpc-1.0.1 mpc
 
@@ -74,19 +78,23 @@ LDFLAGS="%{rpmldflags}"			\
 	--mandir=%{_mandir}		\
 	--prefix=%{_prefix}		\
 	--sbindir=%{_sbindir}		\
+	--with-mpfr-include=$(pwd)/../mpfr/src	\
+	--with-mpfr-lib=$(pwd)/mpfr/src/.libs	\
 	--disable-decimal-float		\
+	--disable-libatomic		\
+	--disable-libcilkrts		\
 	--disable-libgomp		\
-	--disable-libmudflap		\
+	--disable-libitm		\
 	--disable-libquadmath		\
+	--disable-libsanitizer		\
 	--disable-libssp		\
+	--disable-libstdc++-v3		\
+	--disable-libvtv		\
+	--disable-multilib		\
 	--disable-nls			\
 	--disable-shared		\
 	--disable-threads		\
-	--enable-languages=c		\
-	--with-newlib			\
-	--without-headers		\
-	--with-mpfr-include=$(pwd)/../mpfr/src	\
-	--with-mpfr-lib=$(pwd)/mpfr/src/.libs
+	--enable-languages=c,c++
 cd ..
 
 %{__make} -C obj-%{target} \
@@ -115,15 +123,18 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gccarch}
 %dir %{gcclib}
 %dir %{gcclib}/include
+%attr(755,root,root) %{_bindir}/%{target}-c++
 %attr(755,root,root) %{_bindir}/%{target}-cpp
+%attr(755,root,root) %{_bindir}/%{target}-g++
 %attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-gcov
 %attr(755,root,root) %{gcclib}/*.a
 %attr(755,root,root) %{gcclib}/*.o
 %attr(755,root,root) %{gcclib}/cc1
+%attr(755,root,root) %{gcclib}/cc1plus
 %attr(755,root,root) %{gcclib}/collect2
-%attr(755,root,root) %{gcclib}/lto-wrapper
 %attr(755,root,root) %{gcclib}/liblto_plugin.so*
+%attr(755,root,root) %{gcclib}/lto-wrapper
 %attr(755,root,root) %{gcclib}/lto1
 %{gcclib}/plugin
 %{gcclib}/include/*.h
